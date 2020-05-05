@@ -1,0 +1,199 @@
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+import java.io.File;
+
+public class Main
+{
+    public static void main(String[] args) throws FileNotFoundException
+    {
+        Scanner input = new Scanner(new File("names.txt")); // gets input from .txt file
+        BinaryTree BT = new BinaryTree(); // creates a new BinaryTree
+        while(input.hasNext()) // writes input for BT to receive
+        {
+            String name = input.next();
+            BT.insert(name);
+        }
+        input.close(); // closes the file once done
+        BT.search(); // after the BT has received input it asks the user to search for the name in the tree
+    }
+}
+
+class Node
+{
+    Node dupNext; // used for storage in duplicate names
+    String name;
+    Node right; // used for the right side of a tree
+    Node left; // uses for the left side of a tree
+
+    Node(String name) // creates a node object with the name
+    {
+        this.name=name;
+    }
+
+    public Node getDupNext() // gets the next duplicate name
+    {
+        return this.dupNext;
+    }
+
+    public void setDupNext(Node dupNext) // makes the next point to another duplicate
+    {
+        this.dupNext=dupNext;
+    }
+
+    public String getName() // returns the name of the leaf
+    {
+        return this.name;
+    }
+
+    public Node getRight() // gets the right side of the leaf
+    {
+        return this.right;
+    }
+
+    public void setRight(Node right) // points towards the right side of the leaf
+    {
+        this.right=right;
+    }
+
+    public void setLeft(Node left) // points towards the left side of the leaf
+    {
+        this.left=left;
+    }
+
+    public Node getLeft() // gets the left side of the leaf
+    {
+        return this.left;
+    }
+
+}
+class BinaryTree
+{
+    Node root;
+    String name;
+
+    public void insert(String key) // recursion method to insert a name into the binary tree
+    {
+        root = insert(root, key);
+    }
+
+    public Node insert(Node leaf, String key) // recursion method
+    {
+        if (leaf == null) // if it is empty, make a new object
+        {
+            if(find(key)) // checks to see if there are any duplicates in the tree to add it to a linkedlist
+            {
+                Node foundNode = findNode(key); // creates a new node if a duplicate name has been found
+                leaf = new Node(key); // makes a new object
+                while(foundNode.getDupNext() != null) // loops to make the duplicate name standalone
+                {
+                    foundNode = foundNode.getDupNext();
+                }
+                foundNode.setDupNext(leaf); // points the name towards the leaf
+            }
+            else // otherwise just make a new object
+            {
+                leaf = new Node(key);
+            }
+        }
+        else if (key.compareToIgnoreCase(leaf.getName()) > 0) // puts on the left side to indicate that the name is bigger than the root
+        {
+            leaf.setLeft(insert(leaf.getLeft(), key));
+        }
+        else // otherwise put it on the right side to indicate that the name is smaller than the root
+        {
+            leaf.setRight(insert(leaf.getRight(), key));
+        }
+        return leaf;
+    }
+    public boolean find(String key) // checks to see if the duplicate name exists in the tree
+    {
+        Node curr = root;
+        boolean found = false;
+        while(!found)
+        {
+            if(curr==null) // if node is exhausted, leave the loop and return false
+            {
+                break;
+            }
+            else if(curr.getName().equalsIgnoreCase(key)) // if node is exhausted, leave the loop and return true
+            {
+                found = true;
+                break;
+            }
+            else if((key.compareToIgnoreCase(curr.getName())) < 0) // goes to the right side of the tree
+            {
+                curr=curr.getRight();
+            }
+            else // goes to the left side of the tree
+            {
+                curr=curr.getLeft();
+            }
+        }
+        return found;
+    }
+    public void search() {
+        if (root == null) // if the binary tree is empty, there's no reason to continue further and search
+        {
+            System.out.println("There's no reason to search if there's no binary tree available.");
+            return;
+        }
+        Node leaf = root;
+        int iter = 0;
+        Scanner input = new Scanner(System.in);
+        System.out.println("What name are you looking for?");
+        String key = input.next();
+        boolean found = false;
+        while (!found) {
+            if (leaf == null) // if the binaxry tree is exhausted, it will no longer continue.
+            {
+                System.out.println("\nThe name can not be found in the binary tree.");
+                return;
+            } else if (leaf.getName().equalsIgnoreCase(key))
+            {
+                found = true; // if the name is found, it will stop the while loop.
+                System.out.print(leaf.getName());
+                while (leaf.getDupNext() != null) // looks down the linkedlist in the binary tree to see if there are any duplicates.
+                {
+                    iter++;
+                    leaf = leaf.getDupNext();
+                }
+            }
+            else if ((key.compareToIgnoreCase(leaf.getName())) < 0) // if the key is smaller, it then traces to the right side of the root
+            {
+                System.out.print(leaf.getName() + " --> ");
+                leaf = leaf.getRight();
+            }
+            else // if the key is bigger, it will trace to the left side of the root it is in
+            {
+                System.out.print(leaf.getName() + " --> ");
+                leaf = leaf.getLeft();
+            }
+        }
+        System.out.println("\nThe name, " + leaf.getName() + " has been found. There are " + iter + " duplicates in the binary tree.");
+    }
+    public Node findNode(String key)
+    {
+        boolean found = false;
+        Node curr = root;
+        while(!found)
+        {
+            if (curr == null) // if the binary tree is exhausted, it will no longer continue.
+            {
+                return null;
+            }
+            else if (curr.getName().equalsIgnoreCase(key))
+            {
+                found = true; // if the name is found, it will stop the while loop.
+            }
+            else if ((key.compareToIgnoreCase(curr.getName())) < 0) // if the key is smaller, it then traces to the right side of the root
+            {
+                curr = curr.getRight();
+            }
+            else // if the key is bigger, it will trace to the left side of the root it is in
+            {
+                curr = curr.getLeft();
+            }
+        }
+        return curr;
+    }
+}
